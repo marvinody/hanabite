@@ -34,11 +34,9 @@ export const fetchRoomList = () => {
 socket.on('res_room_list', newRoomList => {
   newRoomList.loaded = true;
   roomList.set(newRoomList)
-  console.log(newRoomList)
 })
 
 
 socket.on('self_info', newSelf => {
   self.set(newSelf)
-  console.log()
 })
