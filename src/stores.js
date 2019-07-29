@@ -14,7 +14,10 @@ function createCount() {
 }
 
 /* STATE/STORE holders,updaters*/
-export const count = createCount();
+export const self = writable({
+  id: 0,
+  name: 'No-name McGee'
+})
 
 export const roomList = writable([])
 export const room = writable({})
@@ -31,6 +34,11 @@ export const fetchRoomList = () => {
 socket.on('res_room_list', newRoomList => {
   newRoomList.loaded = true;
   roomList.set(newRoomList)
-  console.log('GOT ROOM DATA')
   console.log(newRoomList)
+})
+
+
+socket.on('self_info', newSelf => {
+  self.set(newSelf)
+  console.log()
 })

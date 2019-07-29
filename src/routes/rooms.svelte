@@ -4,12 +4,14 @@
   onMount(() => {
     fetchRoomList();
   });
+  import RoomForm from "../components/RoomForm";
 </script>
 
 <svelte:head>
   <title>Room list</title>
 </svelte:head>
 
+<RoomForm />
 <ul>
   {#if $roomList.loaded && $roomList.length > 0}
     {#each $roomList as room}
