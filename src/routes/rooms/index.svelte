@@ -1,10 +1,10 @@
 <script>
   import { onMount } from "svelte";
-  import { fetchRoomList, roomList } from "../stores";
+  import { fetchRoomList, roomList } from "../../stores";
   onMount(() => {
     fetchRoomList();
   });
-  import RoomForm from "../components/RoomForm";
+  import RoomForm from "../../components/RoomForm";
 </script>
 
 <svelte:head>
