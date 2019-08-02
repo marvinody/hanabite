@@ -44,6 +44,14 @@ socket.on('res_room_create', newRoom => {
 })
 
 
+export const joinRoom = id => {
+  socket.emit('req_room_join', id)
+}
+socket.on('res_room_join', newRoom => {
+  newRoom.loaded = true;
+  room.set(newRoom)
+})
+
 socket.on('self_info', newSelf => {
   self.set(newSelf)
 })

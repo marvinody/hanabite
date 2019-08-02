@@ -24,5 +24,18 @@ export default function (io) {
       socket.emit('res_room_create', room.basicInfo())
     })
 
+    socket.on('req_room_join', id => {
+      console.log(`${socket.data.name} joining ${id}`)
+      const room = rooms.findById(id)
+      if (!room) {
+        // just send empty obj if 404
+        socket.emit('res_room_join', {})
+        return
+      }
+      room.addPlayer(socket)
+      console.log(room);
+      socket.emit('res_room_join', room.expandedInfo())
+    })
+
   })
 }
