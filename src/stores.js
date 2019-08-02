@@ -1,6 +1,6 @@
+import { goto } from '@sapper/app';
 import io from 'socket.io-client';
 import { writable } from 'svelte/store';
-
 
 function createCount() {
   const { subscribe, set, update } = writable(0);
@@ -34,6 +34,13 @@ export const fetchRoomList = () => {
 socket.on('res_room_list', newRoomList => {
   newRoomList.loaded = true;
   roomList.set(newRoomList)
+})
+
+export const createRoom = roomData => {
+  socket.emit('req_room_create', roomData)
+}
+socket.on('res_room_create', newRoom => {
+  goto(`/rooms/${newRoom.id}`)
 })
 
 

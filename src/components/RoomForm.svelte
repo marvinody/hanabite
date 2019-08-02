@@ -1,14 +1,15 @@
 <script>
-  let roomName = `My room is my room`;
   import TextField from "./TextField";
   import DropdownField from "./DropdownField";
   import { fly, fade } from "svelte/transition";
+  import { createRoom } from "../stores";
+
+  let roomName = `My room is my room`;
   const lobbySizes = [2, 3, 4, 5];
   let selected;
 
   const handleSubmit = () => {
-    console.log(roomName);
-    console.log(selected);
+    createRoom({ name: roomName, size: selected });
   };
 
   let visible = false;
