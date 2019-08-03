@@ -33,7 +33,6 @@ export default function (io) {
         return
       }
       room.addPlayer(socket)
-      console.log(room);
       socket.emit('res_room_join', room.expandedInfo())
     })
 

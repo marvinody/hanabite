@@ -24,4 +24,4 @@
   <title>{title}</title>
 </svelte:head>
 
-<Room {...$room} />
+<Room />

@@ -15,7 +15,9 @@
 <ul>
   {#if $roomList.loaded && $roomList.length > 0}
     {#each $roomList as room}
-      <li />
+      <li>
+        <a href="/rooms/{room.id}">{room.name}</a>
+      </li>
     {/each}
   {:else if $roomList.loaded && $roomList.length === 0}
     <p>No lobbies</p>
