@@ -5,7 +5,19 @@
     fetchRoomList();
   });
   import RoomForm from "../../components/RoomForm";
+  import RoomListItem from "../../components/RoomListItem";
 </script>
+
+<style>
+  li {
+    padding: 16px;
+    margin: 8px;
+    border: 2px solid black;
+  }
+  li:hover {
+    background-color: #eee;
+  }
+</style>
 
 <svelte:head>
   <title>Room list</title>
@@ -14,13 +26,13 @@
 <RoomForm />
 <ul>
   {#if $roomList.loaded && $roomList.length > 0}
-    {#each $roomList as room}
+    {#each $roomList as room (room.id)}
       <li>
-        <a href="/rooms/{room.id}">{room.name}</a>
+        <RoomListItem {...room} />
       </li>
     {/each}
   {:else if $roomList.loaded && $roomList.length === 0}
-    <p>No lobbies</p>
+    <p>No lobbies. Create your own!</p>
   {:else}
     <p>Loading lobbies</p>
   {/if}
