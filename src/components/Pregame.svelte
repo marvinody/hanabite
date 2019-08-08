@@ -13,6 +13,10 @@
   .host::before {
     content: "*";
   }
+  .room-player-list {
+    display: flex;
+    flex-direction: column;
+  }
 </style>
 
 <div class="columns">
@@ -25,11 +29,9 @@
     </div>
     <div class="room-player-info">
       <h1 class="title is-4">Players:</h1>
-      <div class="room-player-list columns">
+      <div class="room-player-list">
         {#each $room.players as player (player.id)}
-          <div class="column" class:host={player.id === $room.host.id}>
-            {player.name}
-          </div>
+          <div class:host={player.id === $room.host.id}>{player.name}</div>
         {/each}
       </div>
     </div>

@@ -60,7 +60,7 @@ export default function (io) {
       socket.data.timeJoinedRoom = Date.now()
       socket.emit('res_room_join', this.expandedInfo())
       // now everyone else in the room can know
-      socket.to(this.uniqueName).emit('room_player_update', this.expandedInfo())
+      socket.to(this.uniqueName).emit('room_player_join', this.expandedInfo())
       // and the lobby
       io.to('lobby').emit('lobby_room_update', this.basicInfo())
       // and we'll add a message and share that. but socket needs them all

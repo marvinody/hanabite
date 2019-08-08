@@ -12,14 +12,33 @@ function writeableArray() {
   };
 }
 
+function loadingWritable(initial) {
+  const { subscribe, set: originalSet, update: originalUpdate } = writable(initial);
+  return {
+    subscribe,
+    set: state => {
+      state.loaded = true;
+      originalSet(state)
+    },
+    update: fn => {
+      originalUpdate(state => {
+        const newState = fn(state)
+        newState.loaded = true;
+        return newState
+      })
+    }
+  }
+}
+
+
 /* STATE/STORE holders,updaters*/
 export const self = writable({
   id: 0,
   name: 'No-name McGee'
 })
 
-export const roomList = writable([])
-export const room = writable({})
+export const roomList = loadingWritable([])
+export const room = loadingWritable({})
 export const messages = writeableArray()
 
 const socket = io();
@@ -32,7 +51,6 @@ export const fetchRoomList = () => {
   socket.emit('req_room_list')
 }
 socket.on('res_room_list', newRoomList => {
-  newRoomList.loaded = true;
   roomList.set(newRoomList)
 })
 
@@ -55,7 +73,6 @@ export const joinRoom = id => {
   socket.emit('req_room_join', id)
 }
 socket.on('res_room_join', newRoom => {
-  newRoom.loaded = true;
   room.set(newRoom)
 })
 
@@ -73,4 +90,24 @@ socket.on('room_message_single', msg => {
 
 socket.on('room_message_all', msgs => {
   messages.set(msgs)
+})
+
+/* ROOM PREGAME EVENTS */
+socket.on('room_player_join', newRoom => {
+  room.set(newRoom)
+})
+
+/* LOBBY EVENTS */
+socket.on('lobby_room_create', newRoom => {
+  roomList.update(l => [newRoom, ...l])
+  console.log('UPDATED ROOMLIST')
+})
+
+socket.on('lobby_room_update', updatedRoom => {
+  roomList.update(l => l.map(curRoom => {
+    if (curRoom.id === updatedRoom.id) {
+      return updatedRoom;
+    }
+    return curRoom;
+  }))
 })

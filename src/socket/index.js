@@ -12,6 +12,7 @@ export default function (io) {
       name: nameGen(),
     }
     console.log(`${socket.id} (${socket.data.name} - ${socket.data.id}) has connected`)
+    socket.join('lobby')
     socket.emit('self_info', socket.data)
 
 
@@ -22,6 +23,7 @@ export default function (io) {
     socket.on('req_room_create', data => {
       const room = rooms.newRoom(data);
       socket.emit('res_room_create', room.basicInfo())
+      io.to('lobby').emit('lobby_room_create', room.basicInfo())
     })
 
     socket.on('req_room_join', id => {
