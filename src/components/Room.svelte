@@ -10,7 +10,7 @@
     spectators: [],
     loaded: true
   };
-  import PregameRoom from "./_pregame.svelte";
+  import PregameRoom from "./Pregame.svelte";
   import { room } from "../stores";
   $: ({ loaded, id, state } = $room);
 </script>

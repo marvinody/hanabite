@@ -1,5 +1,6 @@
 <script>
   import { room } from "../stores";
+  import Chat from "./Chat";
 </script>
 
 <style>
@@ -33,5 +34,5 @@
       </div>
     </div>
   </div>
-  <div class="column">CHAT</div>
+  <Chat />
 </div>

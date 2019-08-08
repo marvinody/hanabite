@@ -2,14 +2,13 @@ import { goto } from '@sapper/app';
 import io from 'socket.io-client';
 import { writable } from 'svelte/store';
 
-function createCount() {
-  const { subscribe, set, update } = writable(0);
+function writeableArray() {
+  const { subscribe, set, update } = writable([]);
 
   return {
     subscribe,
-    increment: () => update(n => n + 1),
-    decrement: () => update(n => n - 1),
-    reset: () => set(0)
+    push: (el) => update(n => [...n, el]),
+    set,
   };
 }
 
@@ -21,6 +20,7 @@ export const self = writable({
 
 export const roomList = writable([])
 export const room = writable({})
+export const messages = writeableArray()
 
 const socket = io();
 socket.on('connect', () => {
@@ -54,4 +54,16 @@ socket.on('res_room_join', newRoom => {
 
 socket.on('self_info', newSelf => {
   self.set(newSelf)
+})
+
+
+/* GENERAL EVENTS */
+
+/* CHAT MSG EVENTS */
+socket.on('room_message_single', msg => {
+  messages.push(msg)
+})
+
+socket.on('room_message_all', msgs => {
+  messages.set(msgs)
 })
