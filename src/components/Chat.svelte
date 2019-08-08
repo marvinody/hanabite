@@ -1,5 +1,6 @@
 <script>
   import { messages, sendMessage } from "../stores";
+  import { beforeUpdate, afterUpdate } from "svelte";
 
   const getClassForMsg = msg => {
     if (msg.from) {
@@ -13,6 +14,22 @@
     sendMessage(text);
     text = "";
   };
+  // keep the user scrolled to the bottom of the chat each update if they were originally scrolled done
+  // without this code, the "view" will stay and the messages will be added out of view
+  let chatHistoryDiv;
+  let autoscroll = true;
+
+  // https://svelte.dev/tutorial/update
+  beforeUpdate(() => {
+    autoscroll =
+      chatHistoryDiv &&
+      chatHistoryDiv.offsetHeight + chatHistoryDiv.scrollTop >
+        chatHistoryDiv.scrollHeight - 20;
+  });
+
+  afterUpdate(() => {
+    if (autoscroll) chatHistoryDiv.scrollTo(0, chatHistoryDiv.scrollHeight);
+  });
 </script>
 
 <style>
@@ -26,12 +43,12 @@
     color: grey;
   }
   .chat-history {
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 </style>
 
 <div class="column chat">
-  <div class="chat-history">
+  <div class="chat-history" bind:this={chatHistoryDiv}>
     {#each $messages as message (message.id)}
       <div class={getClassForMsg(message)}>
         <span>{message.from ? message.from + ': ' : ''}</span>
