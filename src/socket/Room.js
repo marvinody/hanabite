@@ -127,9 +127,6 @@ export default function (io) {
           id: this.host.data.id
         },
         size: this.size,
-        storyMessages: this.storyMessages,
-        prompt: this.prompt,
-        dieClass: this.dieClass,
         curPlayer: this.curPlayer,
         players: Object.keys(this.players).map(k => ({
           name: this.players[k].data.name,
