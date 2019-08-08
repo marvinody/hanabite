@@ -1,11 +1,17 @@
 <script>
-  import { messages } from "../stores";
+  import { messages, sendMessage } from "../stores";
 
   const getClassForMsg = msg => {
     if (msg.from) {
       return "user-msg";
     }
     return "server-msg";
+  };
+
+  let text = "";
+  const send = () => {
+    sendMessage(text);
+    text = "";
   };
 </script>
 
@@ -19,6 +25,9 @@
   .server-msg {
     color: grey;
   }
+  .chat-history {
+    overflow-y: scroll;
+  }
 </style>
 
 <div class="column chat">
@@ -31,11 +40,17 @@
     {/each}
   </div>
   <div class="field has-addons">
-    <p class="control is-expanded">
-      <input class="input" type="text" placeholder="Send a message" />
-    </p>
+    <form on:submit|preventDefault={send}>
+      <p class="control is-expanded">
+        <input
+          class="input"
+          type="text"
+          placeholder="Send a message"
+          bind:value={text} />
+      </p>
+    </form>
     <div class="control">
-      <a class="button is-info">Send</a>
+      <button class="button is-info" on:click={send}>Send</button>
     </div>
   </div>
 </div>

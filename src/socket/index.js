@@ -36,5 +36,13 @@ export default function (io) {
       socket.emit('res_room_join', room.expandedInfo())
     })
 
+    socket.on('req_room_message', msg => {
+      // if user not part of room, don't bother doing anything
+      if (!socket.data.room) {
+        return
+      }
+      socket.data.room.addMessage(msg, socket.data.name)
+    })
+
   })
 }

@@ -43,6 +43,13 @@ socket.on('res_room_create', newRoom => {
   goto(`/rooms/${newRoom.id}`)
 })
 
+// this has no socket.on with it because everyone is updated of the msg
+// one could update check and update locally to have better UI but
+// dont want to in this case because a little more work and I'm lazy
+export const sendMessage = msg => {
+  socket.emit('req_room_message', msg)
+}
+
 
 export const joinRoom = id => {
   socket.emit('req_room_join', id)
