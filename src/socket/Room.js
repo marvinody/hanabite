@@ -44,10 +44,14 @@ export default function (io) {
     }
 
     addPlayer(socket) {
+      // TODO this needs to change if entering a game midway. should be true in that case
+      socket.data.ready = false;
       const numPlayers = Object.keys(this.players).length
       if (numPlayers === 0) {
         this.host = socket
         this.players[socket.id] = socket
+        // the host will always be ready by default
+        socket.data.ready = true;
       } else if (numPlayers === this.size) {
         this.spectators[socket.id] = socket
       } else {
@@ -130,7 +134,8 @@ export default function (io) {
         curPlayer: this.curPlayer,
         players: Object.keys(this.players).map(k => ({
           name: this.players[k].data.name,
-          id: this.players[k].data.id
+          id: this.players[k].data.id,
+          ready: this.players[k].data.ready
         })),
         spectators: Object.keys(this.spectators).map(k => ({
           name: this.spectators[k].data.name,

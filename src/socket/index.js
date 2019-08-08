@@ -1,6 +1,13 @@
 import idGen from '../id';
 import nameGen from './name';
 import RoomMaker from './Room';
+
+const getUserData = socket => ({
+  id: socket.data.id,
+  name: socket.data.name,
+  ready: socket.data.ready
+})
+
 export default function (io) {
   // let's "make" our roomlist constructor
   const { RoomList } = RoomMaker(io)
@@ -13,7 +20,7 @@ export default function (io) {
     }
     console.log(`${socket.id} (${socket.data.name} - ${socket.data.id}) has connected`)
     socket.join('lobby')
-    socket.emit('self_info', socket.data)
+    socket.emit('self_info', getUserData(socket))
 
 
     socket.on('req_room_list', () => {
