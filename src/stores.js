@@ -61,6 +61,12 @@ socket.on('res_room_create', newRoom => {
   goto(`/rooms/${newRoom.id}`)
 })
 
+// this has no socket.on with it because the server sends a self_info and a room_player_state
+export const setReadyState = ready => {
+  socket.emit('req_self_ready_set', ready)
+}
+
+
 // this has no socket.on with it because everyone is updated of the msg
 // one could update check and update locally to have better UI but
 // dont want to in this case because a little more work and I'm lazy
@@ -109,5 +115,17 @@ socket.on('lobby_room_update', updatedRoom => {
       return updatedRoom;
     }
     return curRoom;
+  }))
+})
+
+socket.on('room_player_state', player => {
+  room.update(state => ({
+    ...state,
+    players: state.players.map(curPlayer => {
+      if (curPlayer.id === player.id) {
+        return player;
+      }
+      return curPlayer;
+    })
   }))
 })

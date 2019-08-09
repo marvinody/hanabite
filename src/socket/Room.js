@@ -2,7 +2,7 @@ const MIN_PLAYERS = 1
 const MAX_PLAYERS = 4
 const MAX_CHARS_FOR_MSG = 160 // screw twitter
 import genId from '../id';
-
+import { getUserData } from './utils';
 export default function (io) {
   class Room {
     constructor(name, size = MIN_PLAYERS) {
@@ -106,6 +106,12 @@ export default function (io) {
       return Object.keys(this.players).length === 0
     }
 
+    updatePlayer(socket) {
+      const userData = getUserData(socket)
+      socket.emit('self_info', userData)
+      io.to(this.uniqueName).emit('room_player_state', userData)
+    }
+
     // this should only be called when a player leaves
     upgradeSpectator() {
       const spectKeys = Object.keys(this.spectators)
@@ -132,11 +138,7 @@ export default function (io) {
         },
         size: this.size,
         curPlayer: this.curPlayer,
-        players: Object.keys(this.players).map(k => ({
-          name: this.players[k].data.name,
-          id: this.players[k].data.id,
-          ready: this.players[k].data.ready
-        })),
+        players: Object.values(this.players).map(getUserData),
         spectators: Object.keys(this.spectators).map(k => ({
           name: this.spectators[k].data.name,
           id: this.spectators[k].data.id

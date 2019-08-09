@@ -1,5 +1,5 @@
 <script>
-  import { room, self } from "../stores";
+  import { room, self, setReadyState } from "../stores";
   import Chat from "./Chat";
   $: allPlayersReady =
     $room.players && $room.players.every(player => player.ready);
@@ -7,6 +7,10 @@
     ? new Array($room.size - $room.players.length)
     : [];
   $: host = $room && $room.host.id === $self.id;
+
+  const toggleReady = () => {
+    setReadyState(!$self.ready);
+  };
 </script>
 
 <style>
@@ -54,8 +58,8 @@
             Start
           </button>
         {:else}
-          <button class="button is-info">
-            {#if self.ready}Ready Down{:else}Ready Up{/if}
+          <button class="button is-info" on:click={toggleReady}>
+            {#if $self.ready}Ready Down{:else}Ready Up{/if}
           </button>
         {/if}
 

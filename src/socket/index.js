@@ -1,12 +1,7 @@
 import idGen from '../id';
 import nameGen from './name';
 import RoomMaker from './Room';
-
-const getUserData = socket => ({
-  id: socket.data.id,
-  name: socket.data.name,
-  ready: socket.data.ready
-})
+import { getUserData } from './utils';
 
 export default function (io) {
   // let's "make" our roomlist constructor
@@ -51,6 +46,14 @@ export default function (io) {
         return
       }
       socket.data.room.addMessage(msg, socket.data.name)
+    })
+
+    socket.on('req_self_ready_set', ready => {
+      if (!socket.data.room) {
+        return
+      }
+      socket.data.ready = ready;
+      socket.data.room.updatePlayer(socket)
     })
 
   })
