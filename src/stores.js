@@ -86,6 +86,13 @@ socket.on('res_room_join', newRoom => {
   room.set(newRoom)
 })
 
+export const leaveRoom = () => {
+  socket.emit('req_room_leave')
+}
+socket.on('res_room_leave', () => {
+  goto('/rooms/')
+})
+
 socket.on('self_info', newSelf => {
   self.set(newSelf)
 })
@@ -119,6 +126,10 @@ socket.on('lobby_room_update', updatedRoom => {
     }
     return curRoom;
   }))
+})
+
+socket.on('lobby_room_remove', id => {
+  roomList.update(l => l.filter(curRoom => curRoom.id !== id))
 })
 
 socket.on('room_player_state_update', player => {

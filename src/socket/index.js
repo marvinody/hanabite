@@ -65,5 +65,10 @@ export default function (io) {
       socket.data.room.attemptToStart(socket);
     })
 
+    socket.on('disconnect', () => {
+      if (socket.data.room) {
+        rooms.removePlayer(socket, socket.data.room.id)
+      }
+    })
   })
 }
