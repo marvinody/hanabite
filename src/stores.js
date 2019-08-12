@@ -110,7 +110,6 @@ socket.on('room_player_join', newRoom => {
 /* LOBBY EVENTS */
 socket.on('lobby_room_create', newRoom => {
   roomList.update(l => [newRoom, ...l])
-  console.log('UPDATED ROOMLIST')
 })
 
 socket.on('lobby_room_update', updatedRoom => {

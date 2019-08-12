@@ -11,6 +11,8 @@
     switch (curState) {
       case "ROOM_PREGAME":
         return "Waiting to Start";
+      case "ROOM_INGAME":
+        return "In progress";
     }
   }
 </script>
