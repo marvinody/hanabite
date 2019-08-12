@@ -74,6 +74,10 @@ export const sendMessage = msg => {
   socket.emit('req_room_message', msg)
 }
 
+// this has no .on because the whole lobby will be updated. Also, only the host will have any effect on triggering it
+export const roomStart = () => {
+  socket.emit('req_room_start')
+}
 
 export const joinRoom = id => {
   socket.emit('req_room_join', id)
@@ -118,7 +122,7 @@ socket.on('lobby_room_update', updatedRoom => {
   }))
 })
 
-socket.on('room_player_state', player => {
+socket.on('room_player_state_update', player => {
   room.update(state => ({
     ...state,
     players: state.players.map(curPlayer => {
@@ -127,5 +131,12 @@ socket.on('room_player_state', player => {
       }
       return curPlayer;
     })
+  }))
+})
+
+socket.on('room_state_update', newState => {
+  room.update(state => ({
+    ...state,
+    ...newState,
   }))
 })

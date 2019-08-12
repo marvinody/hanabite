@@ -49,11 +49,20 @@ export default function (io) {
     })
 
     socket.on('req_self_ready_set', ready => {
+      // if user not part of room, don't bother doing anything
       if (!socket.data.room) {
         return
       }
       socket.data.ready = ready;
       socket.data.room.updatePlayer(socket)
+    })
+
+    socket.on('req_room_start', () => {
+      // if user not part of room, don't bother doing anything
+      if (!socket.data.room) {
+        return;
+      }
+      socket.data.room.attemptToStart(socket);
     })
 
   })

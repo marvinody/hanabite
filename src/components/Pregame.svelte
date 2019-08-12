@@ -1,5 +1,5 @@
 <script>
-  import { room, self, setReadyState } from "../stores";
+  import { room, self, setReadyState, roomStart } from "../stores";
   import Chat from "./Chat";
   $: allPlayersReady =
     $room.players && $room.players.every(player => player.ready);
@@ -54,7 +54,7 @@
           {$room.players.length} / {$room.size} players {$room.spectators.length > 0 ? ` + ${$room.spectators.length} spect.` : ''}
         </h2>
         {#if host}
-          <button disabled={!allPlayersReady} class="button is-info">
+          <button disabled={!allPlayersReady} class="button is-info" on:click={roomStart}>
             Start
           </button>
         {:else}

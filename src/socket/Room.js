@@ -3,25 +3,24 @@ const MAX_PLAYERS = 4
 const MAX_CHARS_FOR_MSG = 160 // screw twitter
 import genId from '../id';
 import { getUserData } from './utils';
+
+const ROOM_PREGAME = 'ROOM_PREGAME'
+const ROOM_INGAME = 'ROOM_INGAME'
+
 export default function (io) {
   class Room {
     constructor(name, size = MIN_PLAYERS) {
-      this.players = {}
-      this.spectators = {}
-      this.name = name
-      this.id = genId()
+      this.host = {}; // socket obj
+      this.players = {} // map of [socket.id] -> socket
+      this.spectators = {} // map of [socket.id] -> socket
+      this.name = name // user chosen room identifier
+      this.id = genId() // unique number to identify room
       this.size = Math.max(MIN_PLAYERS, Math.min(MAX_PLAYERS, size))
-      this.uniqueName = `room-#${this.id}`
-      this.messages = []
-      this.state = 'ROOM_PREGAME'
+      this.uniqueName = `room-#${this.id}` // string for sockets to join
+      this.messages = [] // array of message objects
+      this.state = ROOM_PREGAME
 
       this.curPlayer = 0 // idx for who's turn it is
-    }
-
-    startGame() {
-      this.state = 'ROOM_INGAME'
-      this.curPlayer = 0
-      io.to(this.uniqueName).emit('room_state_update', this.expandedInfo())
     }
 
     addMessage(message, from = null) {
@@ -84,7 +83,7 @@ export default function (io) {
         delete this.players[socket.id]
         this.upgradeSpectator()
         // if ingame, then let's see how to modify the player idx
-        if (this.state === 'ROOM_INGAME') {
+        if (this.state === ROOM_INGAME) {
           // if the usercount is the same, we don't care
           // but if we got less AND the count is on the last player
           // shift it to 0. because that makes sense.
@@ -109,7 +108,30 @@ export default function (io) {
     updatePlayer(socket) {
       const userData = getUserData(socket)
       socket.emit('self_info', userData)
-      io.to(this.uniqueName).emit('room_player_state', userData)
+      io.to(this.uniqueName).emit('room_player_state_update', userData)
+    }
+    // will try to begin the game.
+    attemptToStart(socket) {
+      // can only start a game if it's in the pregame state
+      if (this.state !== ROOM_PREGAME) {
+        return
+      }
+      // only the host can start the game
+      if (this.host.data.id !== socket.data.id) {
+        return
+      }
+      const allReady = Object.values(this.players).every(s => s.data.ready)
+      // can only start if everyone ready
+      if (!allReady) {
+        return
+      }
+
+      this.state = ROOM_INGAME
+      this.curPlayer = 0
+      io.to(this.uniqueName).emit('room_state_update', this.expandedInfo())
+      io.to('lobby').emit('lobby_room_update', this.basicInfo())
+
+
     }
 
     // this should only be called when a player leaves
