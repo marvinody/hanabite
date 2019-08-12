@@ -128,7 +128,10 @@ export default function (io) {
 
       this.state = ROOM_INGAME
       this.curPlayer = 0
-      io.to(this.uniqueName).emit('room_state_update', this.expandedInfo())
+      io.to(this.uniqueName).emit('room_state_update', {
+        state: this.state,
+        curPlayer: this.curPlayer,
+      })
       io.to('lobby').emit('lobby_room_update', this.basicInfo())
 
 
