@@ -11,6 +11,7 @@
   const toggleReady = () => {
     setReadyState(!$self.ready);
   };
+  $: console.log($room);
 </script>
 
 <style>
@@ -54,7 +55,10 @@
           {$room.players.length} / {$room.size} players {$room.spectators.length > 0 ? ` + ${$room.spectators.length} spect.` : ''}
         </h2>
         {#if host}
-          <button disabled={!allPlayersReady} class="button is-info" on:click={roomStart}>
+          <button
+            disabled={!allPlayersReady}
+            class="button is-info"
+            on:click={roomStart}>
             Start
           </button>
         {:else}

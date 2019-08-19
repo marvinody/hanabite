@@ -114,6 +114,15 @@ socket.on('room_player_join', newRoom => {
   room.set(newRoom)
 })
 
+socket.on('room_player_update', ({ players, spectators, host }) => {
+  room.update(s => ({
+    ...s,
+    players,
+    spectators,
+    host,
+  }))
+})
+
 /* LOBBY EVENTS */
 socket.on('lobby_room_create', newRoom => {
   roomList.update(l => [newRoom, ...l])

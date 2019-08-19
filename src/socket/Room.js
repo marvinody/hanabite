@@ -79,7 +79,8 @@ export default function (io) {
     removePlayer(socket) {
       const isPlayer = this.players[socket.id] !== undefined
       const isSpectator = this.spectators[socket.id] !== undefined
-      if (isPlayer) {
+      const isHost = this.host.data.id === socket.data.id;
+      if (isPlayer) { // we might need to swap people in
         delete this.players[socket.id]
         this.upgradeSpectator()
         // if ingame, then let's see how to modify the player idx
@@ -92,6 +93,9 @@ export default function (io) {
             this.curPlayer = 0
           }
         }
+        if (isHost) {
+          this.upgradeHost();
+        }
       } else if (isSpectator) {
         delete this.spectators[socket.id]
       }
@@ -100,7 +104,7 @@ export default function (io) {
       delete socket.data.room
       delete socket.data.timeJoinedRoom
       // tell everyone else that room has changed
-      socket.to(this.uniqueName).emit('room_player_update', this.expandedInfo())
+      socket.to(this.uniqueName).emit('room_player_update', this.playerInfo())
       io.to('lobby').emit('lobby_room_update', this.basicInfo())
       return Object.keys(this.players).length === 0
     }
@@ -147,9 +151,22 @@ export default function (io) {
       const oldestSpectator = spectKeys
         .map(k => this.spectators[k])
         .sort((a, b) => a.data.timeJoinedRoom - b.data.timeJoinedRoom)[0]
-
       delete this.spectators[oldestSpectator.id]
+      oldestSpectator.data.ready = false;
       this.players[oldestSpectator.id] = oldestSpectator
+    }
+    upgradeHost() {
+      const playerKeys = Object.keys(this.players);
+      if (playerKeys.length === 0) {
+        // no players to change into host, room will get deleted
+        return;
+      }
+      const oldestPlayer = playerKeys
+        .map(k => this.players[k])
+        .sort((a, b) => a.data.timeJoinedRoom - b.data.timeJoinedRoom)[0]
+      // host is always ready
+      oldestPlayer.data.ready = true;
+      this.host = oldestPlayer
     }
 
     expandedInfo() {
@@ -157,17 +174,23 @@ export default function (io) {
         id: this.id,
         name: this.name,
         state: this.state,
-        host: {
-          name: this.host.data.name,
-          id: this.host.data.id
-        },
         size: this.size,
         curPlayer: this.curPlayer,
+        ...this.playerInfo(),
+      }
+    }
+
+    playerInfo() {
+      return {
         players: Object.values(this.players).map(getUserData),
         spectators: Object.keys(this.spectators).map(k => ({
           name: this.spectators[k].data.name,
           id: this.spectators[k].data.id
-        }))
+        })),
+        host: {
+          name: this.host.data.name,
+          id: this.host.data.id
+        },
       }
     }
 
