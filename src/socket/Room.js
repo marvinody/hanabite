@@ -2,12 +2,14 @@ const MIN_PLAYERS = 1
 const MAX_PLAYERS = 4
 const MAX_CHARS_FOR_MSG = 160 // screw twitter
 import genId from '../id';
+import gameFactory from './Game';
 import { getUserData } from './utils';
 
 const ROOM_PREGAME = 'ROOM_PREGAME'
 const ROOM_INGAME = 'ROOM_INGAME'
 
 export default function (io) {
+  const Game = gameFactory(io);
   class Room {
     constructor(name, size = MIN_PLAYERS) {
       this.host = {}; // socket obj
@@ -131,11 +133,10 @@ export default function (io) {
       }
 
       this.state = ROOM_INGAME
-      this.curPlayer = 0
       io.to(this.uniqueName).emit('room_state_update', {
         state: this.state,
-        curPlayer: this.curPlayer,
       })
+      this.game = new Game(this.players, this.size, this.uniqueName)
       io.to('lobby').emit('lobby_room_update', this.basicInfo())
 
 

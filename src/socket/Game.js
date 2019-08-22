@@ -28,6 +28,8 @@ export default function (io) {
       this.playerOrder = Object.keys(players);
       this.currentPlayerIdx = 0;
 
+      this.dealHands();
+
       io.to(roomCode).emit('game_public_info', this.publicGameInfo())
     }
     // returns [isAI: bool, player: socket]
@@ -78,7 +80,7 @@ export default function (io) {
     }
     dealHands() {
       const numCards = initialHandCount();
-      this.players.forEach(playerId => {
+      this.playerOrder.forEach(playerId => {
         const player = this.players[playerId]
         this.dealCardsToPlayer(initialHandCount, player)
       });

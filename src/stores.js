@@ -41,6 +41,8 @@ export const roomList = loadingWritable([])
 export const room = loadingWritable({})
 export const messages = writeableArray()
 
+export const game = writable({})
+
 const socket = io();
 socket.on('connect', () => {
   console.log('CONNECTED')
@@ -158,4 +160,10 @@ socket.on('room_state_update', newState => {
     ...state,
     ...newState,
   }))
+})
+
+/*GAME EVENTS*/
+socket.on('game_public_info', publicInfo => {
+  game.set(publicInfo)
+  console.log(publicInfo)
 })
