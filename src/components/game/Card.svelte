@@ -1,6 +1,6 @@
 <script>
-  export let color = "gray";
-  export let value = 0;
+  export let color = "grey";
+  export let value = "";
 </script>
 
 <style>
@@ -27,6 +27,9 @@
   }
   .red {
     background-color: red;
+  }
+  .grey {
+    background-color: #c8c8c8;
   }
   .outline {
     color: white;
