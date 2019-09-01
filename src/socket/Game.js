@@ -1,6 +1,6 @@
 const suits = 'white yellow green blue red'.split(' ');
 const initialHandCount = (numPlayers) => {
-  if (numPlayers === 2 || numPlayers === 3) {
+  if (numPlayers <= 3) {
     return 5;
   }
   return 4;
@@ -36,7 +36,9 @@ export default function (io) {
 
       this.dealHands();
 
-      io.to(roomCode).emit('game_public_info', this.publicGameInfo())
+      this.sendPublicGameInfo();
+      this.sendPrivateGameInfo();
+
     }
     // returns [isAI: bool, player: socket]
     // player is undefined is bool is true
@@ -63,14 +65,17 @@ export default function (io) {
 
       const { type, value, negation } = data
     }
+
     // attempt to play a card on a pile
     playCard(player, data) {
       const { cardIdx } = data
     }
+
     // discard a card to the discard pile
     discard(player, data) {
       const { cardIdx } = data
     }
+
 
     // remove will swap a player to AI and keep playing
     removePlayer(socket) {
@@ -84,22 +89,57 @@ export default function (io) {
     addPlayer(socket) {
 
     }
+
     dealHands() {
       const numCards = initialHandCount();
       this.playerOrder.forEach(playerId => {
         const player = this.players[playerId]
-        this.dealCardsToPlayer(initialHandCount, player)
+        this.dealCardsToPlayer(numCards, player)
       });
     }
+
     dealCardsToPlayer(n, player) {
       player.data.cards = this.deck.splice(0, n)
     }
+
+    sendPublicGameInfo() {
+      io.to(this.roomCode).emit('game_public_info', this.publicGameInfo())
+    }
+
     publicGameInfo() {
       return {
         tokens: this.tokens,
         field: this.field,
         graveyard: this.graveyard,
+        deck: this.deck.length,
       }
+    }
+
+    sendPrivateGameInfo() {
+      const privateInfo = this.privateGameInfo();
+      this.playerOrder.forEach(playerId => {
+        const playersInfo = privateInfo[playerId];
+        io.to(playerId).emit('game_private_info', playersInfo);
+      })
+    }
+
+    // get an object of all playerId -> cards they see
+    privateGameInfo() {
+      return this.playerOrder.reduce((acc, playerId) => ({
+        ...acc,
+        [playerId]: this.privateGameInfoForPlayer(playerId)
+      }), {})
+    }
+
+    // get an array of the cards the player will be able to see
+    privateGameInfoForPlayer(playerHandId) {
+      return this.playerOrder.map(playerId => {
+        const cards = this.players[playerId].data.cards;
+        if (playerHandId === playerId) {
+          return cards.map(() => cardMaker('grey', 0))
+        }
+        return cards;
+      })
     }
   }
 
