@@ -42,6 +42,7 @@ export const room = loadingWritable({})
 export const messages = writeableArray()
 
 export const game = loadingWritable({})
+export const hands = loadingWritable([])
 
 const socket = io();
 socket.on('connect', () => {
@@ -164,6 +165,10 @@ socket.on('room_state_update', newState => {
 
 /*GAME EVENTS*/
 socket.on('game_public_info', publicInfo => {
-  console.log('settng public info:', publicInfo)
   game.set(publicInfo)
+})
+
+socket.on('game_private_info', privateInfo => {
+  console.log(privateInfo)
+  hands.set(privateInfo)
 })
