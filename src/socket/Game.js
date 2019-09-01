@@ -18,8 +18,14 @@ export default function (io) {
         ...acc, [suit]: 0
       }), {}) // all suits start at 0 card
       this.tokens = {
-        info: 8,
-        fuse: 3,
+        info: {
+          starting: 8,
+          current: 8,
+        },
+        fuse: {
+          starting: 3,
+          current: 3,
+        }
       }
       this.deck = deckMaker()
       this.graveyard = []
