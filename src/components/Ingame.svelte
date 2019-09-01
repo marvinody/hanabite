@@ -1,14 +1,9 @@
 <script>
   import { room, self, game } from "../stores";
   import Chat from "./Chat";
+  import Field from "./game/Board.svelte";
 
-  $: {
-    console.groupCollapsed('changed game')
-    console.log({$game})
-    const field = $game.field;
-    console.log({field})
-    console.groupEnd()
-  }
+  $: ({ field, tokens } = $game);
 </script>
 
 <style>
@@ -21,11 +16,7 @@
       <div>Loading...</div>
     {:else}
       <div class="game">
-        <div class="field">
-          {#each Object.entries($game.field) as [color, count] (color)}
-            <div>{color} - {count}</div>
-          {/each}
-        </div>
+        <Field {field} {tokens} />
       </div>
     {/if}
   </div>
