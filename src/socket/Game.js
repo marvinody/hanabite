@@ -1,4 +1,4 @@
-const suits = 'white yellow green blue red'.split(' ');
+const colors = 'white yellow green blue red'.split(' ');
 const initialHandCount = (numPlayers) => {
   if (numPlayers <= 3) {
     return 5;
@@ -14,9 +14,9 @@ export default function (io) {
       this.size = maxSize;
       this.roomCode = roomCode
 
-      this.field = suits.reduce((acc, suit) => ({
-        ...acc, [suit]: 0
-      }), {}) // all suits start at 0 card
+      this.field = colors.reduce((acc, color) => ({
+        ...acc, [color]: 0
+      }), {}) // all colors start at 0 card
       this.tokens = {
         info: {
           starting: 8,
@@ -91,7 +91,7 @@ export default function (io) {
     }
 
     dealHands() {
-      const numCards = initialHandCount();
+      const numCards = initialHandCount(this.size);
       this.playerOrder.forEach(playerId => {
         const player = this.players[playerId]
         this.dealCardsToPlayer(numCards, player)
@@ -134,27 +134,31 @@ export default function (io) {
     // get an array of the cards the player will be able to see
     privateGameInfoForPlayer(playerHandId) {
       return this.playerOrder.map(playerId => {
-        const cards = this.players[playerId].data.cards;
+        let cards = this.players[playerId].data.cards;
         if (playerHandId === playerId) {
-          return cards.map(() => cardMaker('grey', 0))
+          cards = cards.map(() => cardMaker('grey', 0))
         }
-        return cards;
+        return {
+          name: this.players[playerId].data.name,
+          id: playerId,
+          cards,
+        };
       })
     }
   }
 
 }
 
-const cardMaker = (suit, value) => ({
-  suit, value
+const cardMaker = (color, value) => ({
+  color, value
 })
 
 function deckMaker() {
   // 3 ones, 2 twos, 2 threes...
   const numOfCardPerNumber = [3, 2, 2, 2, 1];
-  return suits.flatMap(suit => (
+  return colors.flatMap(color => (
     numOfCardPerNumber.flatMap((num, idx) => (
-      Array(num).fill(0).map(() => cardMaker(suit, idx + 1))
+      Array(num).fill(0).map(() => cardMaker(color, idx + 1))
     ))
   ))
 
