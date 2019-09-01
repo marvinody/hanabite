@@ -136,7 +136,7 @@ export default function (io) {
       return this.playerOrder.map(playerId => {
         let cards = this.players[playerId].data.cards;
         if (playerHandId === playerId) {
-          cards = cards.map(() => cardMaker('grey', 0))
+          cards = cards.map(() => cardMaker('grey', '?'))
         }
         return {
           name: this.players[playerId].data.name,
