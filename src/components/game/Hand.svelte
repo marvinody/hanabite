@@ -5,7 +5,7 @@
 
   import { self } from "../../stores";
   $: console.log($self, id);
-  import Card from "./Card.svelte";
+  import PlayerCard from "./PlayerCard.svelte";
 </script>
 
 <style>
@@ -35,8 +35,8 @@
 
 <div class="hand">
   <div class="cards">
-    {#each cards as { color, value }}
-      <Card {color} {value} />
+    {#each cards as { color, value }, idx}
+      <PlayerCard {color} {value} {id} />
     {/each}
   </div>
   <div class="name" class:self={$self.id === id}>{name}</div>
