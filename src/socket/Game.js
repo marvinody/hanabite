@@ -140,7 +140,7 @@ export default function (io) {
         }
         return {
           name: this.players[playerId].data.name,
-          id: playerId,
+          id: this.players[playerId].data.id,
           cards,
         };
       })
