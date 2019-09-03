@@ -3,7 +3,7 @@
   export let color = "grey";
   export let value = "?";
 
-  import { self, game } from "../../stores";
+  import { self, game } from "../../stores/";
   import Card from "./Card.svelte";
 </script>
 

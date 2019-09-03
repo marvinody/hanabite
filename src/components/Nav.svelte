@@ -1,5 +1,4 @@
 <script>
-  import { count } from "../stores";
   export let segment;
 </script>
 

@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { fetchRoomList, roomList } from "../../stores";
+  import { fetchRoomList, roomList } from "../../stores/";
   onMount(() => {
     fetchRoomList();
   });

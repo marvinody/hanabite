@@ -5,7 +5,7 @@
   const { params } = $page;
   const { slug } = params;
 
-  import { joinRoom, room } from "../../stores";
+  import { joinRoom, room } from "../../stores/";
   onMount(() => {
     joinRoom(slug);
   });

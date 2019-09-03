@@ -1,5 +1,5 @@
 <script>
-  import { room, self, setReadyState, roomStart } from "../stores";
+  import { room, self, setReadyState, roomStart } from "../stores/";
   import Chat from "./Chat";
   $: allPlayersReady =
     $room.players && $room.players.every(player => player.ready);

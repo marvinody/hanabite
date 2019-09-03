@@ -1,5 +1,5 @@
 <script>
-  import { messages, sendMessage } from "../stores";
+  import { messages, sendMessage } from "../stores/";
   import { beforeUpdate, afterUpdate } from "svelte";
 
   const getClassForMsg = msg => {

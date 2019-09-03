@@ -3,7 +3,7 @@
   export let id = "";
   export let name = "";
 
-  import { self, game } from "../../stores";
+  import { self, game } from "../../stores/";
   import PlayerCard from "./PlayerCard.svelte";
 </script>
 

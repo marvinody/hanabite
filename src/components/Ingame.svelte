@@ -1,5 +1,5 @@
 <script>
-  import { room, self, game, hands } from "../stores";
+  import { room, self, game, hands } from "../stores/";
   import Chat from "./Chat";
   import Field from "./game/Board.svelte";
   import Hands from "./game/Hands.svelte";

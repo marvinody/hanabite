@@ -12,7 +12,7 @@
   };
   import PregameRoom from "./Pregame.svelte";
   import IngameRoom from "./Ingame.svelte";
-  import { room } from "../stores";
+  import { room } from "../stores/";
   $: ({ loaded, id, state } = $room);
 </script>
 
