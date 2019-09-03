@@ -40,8 +40,8 @@
 
 <div class="hand">
   <div class="cards">
-    {#each cards as { color, value }, idx}
-      <PlayerCard {color} {value} {id} />
+    {#each cards as { color, value }, idx (idx)}
+      <PlayerCard {color} {value} {id} {idx} />
     {/each}
   </div>
   <div class="name" class:self={$self.id === id}>
