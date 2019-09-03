@@ -3,6 +3,7 @@
   export let color = "grey";
   export let value = "?";
 
+  import { self, game } from "../../stores";
   import Card from "./Card.svelte";
 </script>
 
@@ -17,6 +18,6 @@
   }
 </style>
 
-<div class="player-card">
+<div class:player-card={$game.currentPlayer.id === $self.id}>
   <Card {color} {value} />
 </div>
