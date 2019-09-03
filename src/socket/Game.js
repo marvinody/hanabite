@@ -1,3 +1,5 @@
+import { getUserData } from './utils';
+
 const colors = 'white yellow green blue red'.split(' ');
 const initialHandCount = (numPlayers) => {
   if (numPlayers <= 3) {
@@ -107,11 +109,13 @@ export default function (io) {
     }
 
     publicGameInfo() {
+      const currentSocketId = this.playerOrder[this.currentPlayerIdx];
       return {
         tokens: this.tokens,
         field: this.field,
         graveyard: this.graveyard,
         deck: this.deck.length,
+        currentPlayer: getUserData(this.players[currentSocketId]),
       }
     }
 

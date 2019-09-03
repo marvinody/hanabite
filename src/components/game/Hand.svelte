@@ -3,8 +3,7 @@
   export let id = "";
   export let name = "";
 
-  import { self } from "../../stores";
-  $: console.log($self, id);
+  import { self, game } from "../../stores";
   import PlayerCard from "./PlayerCard.svelte";
 </script>
 
@@ -31,6 +30,12 @@
   .cards > div {
     cursor: pointer;
   }
+  .chevron {
+    opacity: 0;
+  }
+  .chevron.active {
+    opacity: 1;
+  }
 </style>
 
 <div class="hand">
@@ -39,5 +44,10 @@
       <PlayerCard {color} {value} {id} />
     {/each}
   </div>
-  <div class="name" class:self={$self.id === id}>{name}</div>
+  <div class="name" class:self={$self.id === id}>
+    <i
+      class="fa fa-chevron-right chevron"
+      class:active={$game.currentPlayer.id === id} />
+    {name}
+  </div>
 </div>

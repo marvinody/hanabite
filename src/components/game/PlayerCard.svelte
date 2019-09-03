@@ -8,7 +8,7 @@
 
 <style>
   .player-card:hover {
-    margin-bottom: 0px;
+    margin-top: 0px;
   }
   .player-card {
     margin-top: 20px;
