@@ -11,7 +11,6 @@ export const selectedCard = writable(initialState)
 
 export const toggleCardSelect = (id, idx) => {
   selectedCard.update((old) => {
-    console.log('toggling card', id, idx, old)
     // if the stuff matches, then let's set it back to nothing
     if (old.id === id && old.idx === idx) {
       return initialState
