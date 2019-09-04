@@ -1,3 +1,4 @@
+/* eslint-disable guard-for-in */
 import { getUserData } from './utils';
 
 const colors = 'white yellow green blue red'.split(' ');
@@ -34,12 +35,20 @@ export default function (io) {
       // preserve ordering so I can use a simple idx to keep track of person
       // just need to remember to update it in places needed
       this.playerOrder = Object.keys(players);
+
+      // also need to attach all the event listeners
+      this.playerOrder.forEach(socketId => {
+        this.addListeners(this.players[socketId])
+      })
+
+      // let's set first player to go
       this.currentPlayerIdx = 0;
 
+      // everyone gets some cards
       this.dealHands();
 
-      this.sendPublicGameInfo();
-      this.sendPrivateGameInfo();
+      // and let everyone know what's going on
+      this.sendGameInfo();
 
     }
     // returns [isAI: bool, player: socket]
@@ -50,6 +59,19 @@ export default function (io) {
       }
       return [true, undefined]
     }
+    // returns true if it is player's turn. false otherwise
+    isCurrentTurnFor(player) {
+      const current = this.players[this.playerOrder[this.currentPlayerIdx]]
+      return player.id === current.id
+    }
+    // advances play to the next player
+    // responsible for sending out updates about everything!
+    nextPlayer() {
+      this.currentPlayerIdx += 1;
+      this.currentPlayerIdx = this.currentPlayerIdx % this.playerOrder.length;
+      this.sendGameInfo();
+    }
+
     // attach all the needed listeners to one socket
     addListeners(player) {
       player.on('game_give_info', data => this.giveInfo(player, data))
@@ -70,14 +92,39 @@ export default function (io) {
 
     // attempt to play a card on a pile
     playCard(player, data) {
-      const { cardIdx } = data
+      if (!this.isCurrentTurnFor(player)) {
+        console.log('not your turn', player.data.name);
+        return;
+      }
+      console.log('playing: ', data)
+      const { idx } = data
+      const { color, value } = this.removeCardFromHandAndDraw(player, idx)
+      if (this.field[color] + 1 !== value) {
+        this.tokens.fuse.current--;
+      }
+
+      if (!this.checkGameOver()) {
+        this.nextPlayer();
+      }
     }
 
     // discard a card to the discard pile
     discard(player, data) {
+      console.log('discarding: ', data)
       const { cardIdx } = data
     }
 
+    // will take out idx from hand and give a new one if possible from deck
+    removeCardFromHandAndDraw(player, idx) {
+      const card = player.data.cards.splice(idx, 1);
+      this.dealCardsToPlayer(1, player)
+      return card;
+    }
+    // game over when no fuse left or too many turns when deck is empty
+    // changes state where needed and sends out events
+    checkGameOver() {
+      return false;
+    }
 
     // remove will swap a player to AI and keep playing
     removePlayer(socket) {
@@ -101,7 +148,17 @@ export default function (io) {
     }
 
     dealCardsToPlayer(n, player) {
-      player.data.cards = this.deck.splice(0, n)
+      if (player.data.cards === undefined) {
+        player.data.cards = [];
+      }
+      if (this.deck.length > 0) {
+        player.data.cards.push(...this.deck.splice(0, n))
+      }
+    }
+
+    sendGameInfo() {
+      this.sendPublicGameInfo();
+      this.sendPrivateGameInfo();
     }
 
     sendPublicGameInfo() {

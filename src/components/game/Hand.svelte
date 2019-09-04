@@ -4,19 +4,19 @@
   export let name = "";
 
   import { fade } from "svelte/transition";
-  import { self as myself, game, selectedCard } from "../../stores/";
+  import { self as myself, game, selectedCard, playCard } from "../../stores/";
   import PlayerCard from "./PlayerCard.svelte";
 
-  $: self = $myself.id === id
-  $: rowSelect = id === $selectedCard.id
-  $: active = $selectedCard.idx > -1 && $selectedCard.id > -1
-
-  const play = () => {
-    console.log('playing', $selectedCard, id, name)
+  $: self = $myself.id === id;
+  $: rowSelect = id === $selectedCard.id;
+  $: active = $selectedCard.idx > -1 && $selectedCard.id > -1;
+  $: currentPlayer = $game.currentPlayer.id === id;
+  $: {
+    console.log(name, currentPlayer);
   }
   const discard = () => {
-    console.log('discarding', $selectedCard)
-  }
+    console.log("discarding", $selectedCard);
+  };
 </script>
 
 <style>
@@ -46,7 +46,7 @@
     opacity: 0;
   }
   .buttons {
-    display:flex;
+    display: flex;
     justify-content: space-around;
   }
   button {
@@ -54,7 +54,7 @@
     cursor: default;
     transition: opacity 0.3s ease-in-out;
   }
-  .active{
+  .active {
     opacity: 1;
   }
   button {
@@ -63,24 +63,42 @@
 </style>
 
 <div class="hand">
-  <div class='buttons' class:active>
+  <div class="buttons" class:active>
     {#if self}
-      <button class='button is-link' class:active={self && rowSelect} on:click={play}>Play</button>
-      <button class='button is-link' class:active={self && rowSelect} on:click={discard}>Discard</button>
+      <button
+        class="button is-link"
+        class:active={self && rowSelect}
+        on:click={playCard}>
+        Play
+      </button>
+      <button
+        class="button is-link"
+        class:active={self && rowSelect}
+        on:click={discard}>
+        Discard
+      </button>
     {:else}
-      <button class='button is-link' class:active={!self && rowSelect} on:click={play}>Color</button>
-      <button class='button is-link' class:active={!self && rowSelect} on:click={play}>Value</button>
+      <button
+        class="button is-link"
+        class:active={!self && rowSelect}
+        on:click={playCard}>
+        Color
+      </button>
+      <button
+        class="button is-link"
+        class:active={!self && rowSelect}
+        on:click={playCard}>
+        Value
+      </button>
     {/if}
   </div>
   <div class="cards">
-    {#each cards as { color, value }, idx }
+    {#each cards as { color, value }, idx}
       <PlayerCard {color} {value} {id} {idx} />
     {/each}
   </div>
   <div class="name" class:self>
-    <i
-      class="fa fa-chevron-right chevron"
-      class:active={$game.currentPlayer.id === id} />
+    <i class="fa fa-chevron-right chevron" class:active={currentPlayer} />
     {name}
   </div>
 </div>
