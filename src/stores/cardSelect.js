@@ -1,4 +1,5 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
+import socket from './socket';
 
 const initialState = {
   id: -1,
@@ -18,4 +19,16 @@ export const toggleCardSelect = (id, idx) => {
     // otherwise, it's a new card so let's just select it
     return { id, idx }
   })
+}
+
+export const playCard = () => {
+  const data = get(selectedCard)
+  socket.emit('game_play_card', data)
+  selectedCard.set(initialState)
+}
+
+export const discard = () => {
+  const data = get(selectedCard)
+  socket.emit('game_discard', data)
+  selectedCard.set(initialState)
 }
