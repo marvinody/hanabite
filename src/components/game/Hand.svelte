@@ -9,11 +9,8 @@
 
   $: self = $myself.id === id;
   $: rowSelect = id === $selectedCard.id;
-  $: active = $selectedCard.idx > -1 && $selectedCard.id > -1;
   $: currentPlayer = $game.currentPlayer.id === id;
-  $: {
-    console.log(name, currentPlayer);
-  }
+  $: active = $selectedCard.idx > -1 && $selectedCard.id > -1 && currentPlayer;
   const discard = () => {
     console.log("discarding", $selectedCard);
   };
@@ -98,7 +95,9 @@
     {/each}
   </div>
   <div class="name" class:self>
-    <i class="fa fa-chevron-right chevron" class:active={currentPlayer} />
+    <span class="chevron" class:active={currentPlayer}>
+      <i class="fa fa-chevron-right" />
+    </span>
     {name}
   </div>
 </div>

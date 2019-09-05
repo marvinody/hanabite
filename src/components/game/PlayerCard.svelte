@@ -30,6 +30,6 @@
   class="player-card"
   class:playable
   class:selected
-  on:click={() => toggleCardSelect(id, idx)}>
+  on:click={() => playable && toggleCardSelect(id, idx)}>
   <Card {color} {value} />
 </div>
