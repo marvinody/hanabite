@@ -12,7 +12,11 @@ const initialHandCount = (numPlayers) => {
 // players should be an object of [socket.id] -> socket
 export default function (io) {
   return class Game {
-    constructor(players, maxSize, roomCode) {
+    constructor(players, maxSize, roomCode, room) {
+
+      // this is such a cop-out
+      this.room = room;
+
       this.players = players;
       this.size = maxSize;
       this.roomCode = roomCode
@@ -51,6 +55,11 @@ export default function (io) {
       this.sendGameInfo();
 
     }
+
+    addMessage(message, from = null) {
+      this.room.addMessage(message, from)
+    }
+
     // returns [isAI: bool, player: socket]
     // player is undefined is bool is true
     currentPlayer() {
@@ -92,15 +101,19 @@ export default function (io) {
 
     // attempt to play a card on a pile
     playCard(player, data) {
+      // guard against other players
       if (!this.isCurrentTurnFor(player)) {
-        console.log('not your turn', player.data.name);
         return;
       }
-      console.log('playing: ', data)
       const { idx } = data
       const { color, value } = this.removeCardFromHandAndDraw(player, idx)
+      console.log(color, value)
       if (this.field[color] + 1 !== value) {
+        this.addMessage(`${player.data.name} played a ${color} ${value} and messed up! -1 fuse token`)
         this.tokens.fuse.current--;
+      } else {
+        this.field[color] += 1
+        this.addMessage(`${player.data.name} played a ${color} ${value}!`)
       }
 
       if (!this.checkGameOver()) {
@@ -116,7 +129,7 @@ export default function (io) {
 
     // will take out idx from hand and give a new one if possible from deck
     removeCardFromHandAndDraw(player, idx) {
-      const card = player.data.cards.splice(idx, 1);
+      const card = player.data.cards.splice(idx, 1)[0];
       this.dealCardsToPlayer(1, player)
       return card;
     }

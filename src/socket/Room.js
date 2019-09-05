@@ -136,7 +136,7 @@ export default function (io) {
       io.to(this.uniqueName).emit('room_state_update', {
         state: this.state,
       })
-      this.game = new Game(this.players, this.size, this.uniqueName)
+      this.game = new Game(this.players, this.size, this.uniqueName, this)
       io.to('lobby').emit('lobby_room_update', this.basicInfo())
 
 
