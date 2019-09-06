@@ -2,6 +2,10 @@
   import { game } from "../../stores";
   $: ({ info, fuse } = $game.tokens);
 
+  // make arrays of how current, starting-current
+  // the arrays will hold true/false and then we concat them
+  // in a certain order
+  // traversing this, we can display with the flag as
   $: currentInfoTokens = new Array(info.current).fill(true);
   $: usedInfoTokenCount = Math.max(0, info.starting - info.current);
   $: usedInfoTokens = new Array(usedInfoTokenCount).fill(false);
