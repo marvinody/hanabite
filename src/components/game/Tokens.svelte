@@ -2,13 +2,15 @@
   import { game } from "../../stores";
   $: ({ info, fuse } = $game.tokens);
 
-  $: currentInfoTokens = new Array(info.current).fill(1);
+  $: currentInfoTokens = new Array(info.current).fill(true);
   $: usedInfoTokenCount = Math.max(0, info.starting - info.current);
-  $: usedInfoTokens = new Array(usedInfoTokenCount).fill(-1);
+  $: usedInfoTokens = new Array(usedInfoTokenCount).fill(false);
+  $: infoTokens = [].concat(currentInfoTokens, usedInfoTokens);
 
-  $: currentFuseTokens = new Array(fuse.current).fill(2);
+  $: currentFuseTokens = new Array(fuse.current).fill(false);
   $: usedFuseTokenCount = Math.max(0, fuse.starting - fuse.current);
-  $: usedFuseTokens = new Array(usedFuseTokenCount).fill(-2);
+  $: usedFuseTokens = new Array(usedFuseTokenCount).fill(true);
+  $: fuseTokens = [].concat(usedFuseTokens, currentFuseTokens);
 </script>
 
 <style>
@@ -39,19 +41,17 @@
 
 <div class="tokens">
   <div class="info-tokens">
-    {#each currentInfoTokens as _}
-      <i class="fas fa-info-circle active" />
-    {/each}
-    {#each usedInfoTokens as _}
-      <i class="fas fa-info-circle inactive" />
+    {#each infoTokens as token}
+      <span class:active={token} class:inactive={!token}>
+        <i class="fas fa-info-circle" />
+      </span>
     {/each}
   </div>
   <div class="fuse-tokens">
-    {#each usedFuseTokens as _}
-      <i class="fas fa-bomb active" />
-    {/each}
-    {#each currentFuseTokens as _}
-      <i class="fas fa-bomb inactive" />
+    {#each fuseTokens as token}
+      <span class:active={token} class:inactive={!token}>
+        <i class="fas fa-bomb" />
+      </span>
     {/each}
   </div>
 </div>
