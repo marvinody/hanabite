@@ -1,14 +1,14 @@
 <script>
-  export let info = {};
-  export let fuse = {};
+  import { game } from "../../stores";
+  $: ({ info, fuse } = $game.tokens);
 
-  const currentInfoTokens = Array.from(new Array(info.current));
-  const usedInfoTokenCount = Math.max(0, info.starting - info.current);
-  const usedInfoTokens = Array.from(new Array(usedInfoTokenCount));
+  $: currentInfoTokens = new Array(info.current).fill(1);
+  $: usedInfoTokenCount = Math.max(0, info.starting - info.current);
+  $: usedInfoTokens = new Array(usedInfoTokenCount).fill(-1);
 
-  const currentFuseTokens = Array.from(new Array(fuse.current));
-  const usedFuseTokenCount = Math.max(0, fuse.starting - fuse.current);
-  const usedFuseTokens = Array.from(new Array(usedFuseTokenCount));
+  $: currentFuseTokens = new Array(fuse.current).fill(2);
+  $: usedFuseTokenCount = Math.max(0, fuse.starting - fuse.current);
+  $: usedFuseTokens = new Array(usedFuseTokenCount).fill(-2);
 </script>
 
 <style>
@@ -39,18 +39,18 @@
 
 <div class="tokens">
   <div class="info-tokens">
-    {#each currentInfoTokens as _ (_)}
+    {#each currentInfoTokens as _}
       <i class="fas fa-info-circle active" />
     {/each}
-    {#each usedInfoTokens as _ (_)}
+    {#each usedInfoTokens as _}
       <i class="fas fa-info-circle inactive" />
     {/each}
   </div>
   <div class="fuse-tokens">
-    {#each usedFuseTokens as _ (_)}
+    {#each usedFuseTokens as _}
       <i class="fas fa-bomb active" />
     {/each}
-    {#each currentFuseTokens as _ (_)}
+    {#each currentFuseTokens as _}
       <i class="fas fa-bomb inactive" />
     {/each}
   </div>

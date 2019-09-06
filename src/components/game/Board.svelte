@@ -2,9 +2,8 @@
   import Card from "./Card.svelte";
   import Tokens from "./Tokens.svelte";
 
-  export let field = {};
-  export let tokens = {};
-  const { info, fuse } = tokens;
+  import { game } from "../../stores";
+  $: field = Object.entries($game.field);
 </script>
 
 <style>
@@ -17,10 +16,10 @@
 
 <div class="board">
   <div class="field">
-    {#each Object.entries(field) as [color, value] (color)}
+    {#each field as [color, value] (color)}
       <Card {color} {value} />
     {/each}
   </div>
-  <Tokens {info} {fuse} />
+  <Tokens />
 
 </div>

@@ -17,13 +17,13 @@
       {#if !$game.loaded}
         <div>Loading...</div>
       {:else}
-        <Field {field} {tokens} />
+        <Field />
       {/if}
 
       {#if !$hands.loaded}
         <div>Loading Hands...</div>
       {:else}
-        <Hands hands={$hands} />
+        <Hands />
       {/if}
     </div>
   </div>
