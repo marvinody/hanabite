@@ -32,3 +32,22 @@ export const discard = () => {
   socket.emit('game_discard', data)
   selectedCard.set(initialState)
 }
+
+const makeReveal = (type) => ({
+  ...get(selectedCard),
+  type,
+  negation: false,
+})
+
+export const revealColor = () => {
+  const data = makeReveal('color')
+  socket.emit('game_give_info', data)
+  selectedCard.set(initialState);
+}
+
+export const revealValue = () => {
+  const data = makeReveal('value')
+  socket.emit('game_give_info', data)
+  selectedCard.set(initialState)
+
+}
