@@ -4,16 +4,19 @@
   export let name = "";
 
   import { fade } from "svelte/transition";
-  import { self as myself, game, selectedCard, playCard } from "../../stores/";
+  import {
+    self as myself,
+    game,
+    selectedCard,
+    playCard,
+    discard
+  } from "../../stores/";
   import PlayerCard from "./PlayerCard.svelte";
 
   $: self = $myself.id === id;
   $: rowSelect = id === $selectedCard.id;
   $: currentPlayer = $game.currentPlayer.id === id;
   $: active = $selectedCard.idx > -1 && $selectedCard.id > -1 && currentPlayer;
-  const discard = () => {
-    console.log("discarding", $selectedCard);
-  };
 </script>
 
 <style>

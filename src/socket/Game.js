@@ -107,10 +107,9 @@ export default function (io) {
       }
       const { idx } = data
       const { color, value } = this.removeCardFromHandAndDraw(player, idx)
-      console.log(color, value)
       if (this.field[color] + 1 !== value) {
         this.addMessage(`${player.data.name} played a ${color} ${value} and messed up! -1 fuse token`)
-        this.tokens.fuse.current--;
+        this.tokens.fuse.current -= 1;
       } else {
         this.field[color] += 1
         this.addMessage(`${player.data.name} played a ${color} ${value}!`)
@@ -123,8 +122,23 @@ export default function (io) {
 
     // discard a card to the discard pile
     discard(player, data) {
-      console.log('discarding: ', data)
-      const { cardIdx } = data
+      // guard against other players
+      if (!this.isCurrentTurnFor(player)) {
+        return;
+      }
+      const { idx } = data
+      const { color, value } = this.removeCardFromHandAndDraw(player, idx)
+      if (this.tokens.info.current === this.tokens.info.starting) {
+        this.addMessage(`${player.data.name} discard a ${color} ${value} and gained no extra info tokens!`)
+      } else {
+        this.tokens.info.current += 1
+        this.addMessage(`${player.data.name} discarded a ${color} ${value} and gained an info token!`)
+      }
+
+      // always need to check gameover incase players try to cheat the game
+      if (!this.checkGameOver()) {
+        this.nextPlayer();
+      }
     }
 
     // will take out idx from hand and give a new one if possible from deck
