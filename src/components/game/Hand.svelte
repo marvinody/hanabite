@@ -9,7 +9,9 @@
     game,
     selectedCard,
     playCard,
-    discard
+    discard,
+    revealColor,
+    revealValue
   } from "../../stores/";
   import PlayerCard from "./PlayerCard.svelte";
 
@@ -81,13 +83,13 @@
       <button
         class="button is-link"
         class:active={!self && rowSelect}
-        on:click={playCard}>
+        on:click={revealColor}>
         Color
       </button>
       <button
         class="button is-link"
         class:active={!self && rowSelect}
-        on:click={playCard}>
+        on:click={revealValue}>
         Value
       </button>
     {/if}
