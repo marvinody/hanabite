@@ -95,8 +95,8 @@
     {/if}
   </div>
   <div class="cards">
-    {#each cards as { color, value }, idx}
-      <PlayerCard {color} {value} {id} {idx} />
+    {#each cards as { color, value, known }, idx}
+      <PlayerCard {color} {value} {id} {idx} {known} />
     {/each}
   </div>
   <div class="name" class:self>

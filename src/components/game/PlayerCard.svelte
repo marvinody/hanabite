@@ -3,12 +3,26 @@
   export let idx = -1;
   export let color = "grey";
   export let value = "?";
+  export let known = {
+    colors: [],
+    values: []
+  };
 
   import { self, game, selectedCard, toggleCardSelect } from "../../stores/";
   import Card from "./Card.svelte";
 
   $: selected = idx === $selectedCard.idx && id === $selectedCard.id;
   $: playable = $game.currentPlayer.id === $self.id;
+  $: selfHand = id === $self.id;
+  $: {
+    // handle setting colors to a correct color if player should know it
+    if (selfHand && known.colors.length === 1) {
+      color = known.colors[0];
+    }
+    if (selfHand && known.values.length === 1) {
+      value = known.values[0];
+    }
+  }
 </script>
 
 <style>
