@@ -1,4 +1,6 @@
 /* eslint-disable guard-for-in */
+import idGen from '../id';
+import nameGen from './name';
 import { getUserData } from './utils';
 
 const allColors = 'white yellow green blue red'.split(' ');
@@ -8,6 +10,15 @@ const initialHandCount = (numPlayers) => {
   }
   return 4;
 }
+
+const generateAI = () => ({
+  data: {
+    id: idGen(),
+    name: nameGen() + ' - AI',
+    isAI: true,
+    handIdx: -1,
+  }
+})
 
 // players should be an object of [socket.id] -> socket
 export default function (io) {
@@ -41,46 +52,64 @@ export default function (io) {
       this.playerOrder = Object.keys(players);
 
       // also need to attach all the event listeners
-      this.playerOrder.forEach(socketId => {
-        this.addListeners(this.players[socketId])
+      Object.values(this.players).forEach(socket => {
+        this.addListeners(socket)
       })
 
       // let's set first player to go
       this.currentPlayerIdx = 0;
+      this.currentHandIdx = 0;
 
       // everyone gets some cards
       this.dealHands();
+
+      // assign hand Idxs
+      this.assignIdxs();
+
+      // make AI players to account for everyone minus 1
+      this.generateAI();
 
       // and let everyone know what's going on
       this.sendGameInfo();
 
     }
 
+    generateAI() {
+      const numMaxAI = this.size - 1;
+      const numPlayers = Object.keys(this.players).length;
+      this.ai = Array(numMaxAI).fill(1).map(() => generateAI());
+      const numAI = this.size - numPlayers;
+      // set the ai's hand to the correct one
+      for (let i = 0; i < numAI; i++) {
+        // if size=2, 1 player, then ai should have hand of [1]
+        this.ai[i].data.handIdx = numPlayers + i;
+      }
+    }
+
+
     addMessage(message, from = null) {
       this.room.addMessage(message, from)
     }
 
-    // returns [isAI: bool, player: socket]
-    // player is undefined is bool is true
-    currentPlayer() {
-      if (this.currentPlayerIdx < this.playerOrder.length) {
-        return [false, this.playerOrder[this.currentPlayerIdx]]
-      }
-      return [true, undefined]
+    // gets the userData for current player. used to send to players
+    currentPlayerData() {
+      return this.getPlayerDataForHandIdx(this.currentHandIdx)
     }
+
     // returns true if it is player's turn. false otherwise
     isCurrentTurnFor(player) {
-      const current = this.players[this.playerOrder[this.currentPlayerIdx]]
-      return player.id === current.id
+      return player.data.handIdx === this.currentHandIdx
     }
+
     // advances play to the next player
     // responsible for sending out updates about everything!
     nextPlayer() {
-      this.currentPlayerIdx += 1;
-      this.currentPlayerIdx = this.currentPlayerIdx % this.playerOrder.length;
+      this.currentHandIdx += 1;
+      this.currentHandIdx = this.currentHandIdx % this.size;
       this.sendGameInfo();
     }
 
+    // TODO fix this to work with AI also
     findSocketByPlayerId(playerId) {
       return Object.values(this.players).find(socket => socket.data.id === playerId)
     }
@@ -116,15 +145,16 @@ export default function (io) {
 
       // grab some stuff
       const infoSocket = this.findSocketByPlayerId(playerId);
-      const card = infoSocket.data.cards[cardIdx];
+      const cards = this.hands[infoSocket.data.handIdx];
+      const wantedCard = cards[cardIdx];
 
       // curried fn. also assume color initially
-      let pred = isSameColor(card)
+      let pred = isSameColor(wantedCard)
       if (type === 'value') {
-        pred = isSameValue(card)
+        pred = isSameValue(wantedCard)
       }
       // this will return the original card which is perfect
-      const matchingCards = infoSocket.data.cards.filter(pred);
+      const matchingCards = cards.filter(pred);
 
       // so for each card that matches the original (including the original)
       // we'll set the known "types" to an array of the orginal's type
@@ -133,7 +163,7 @@ export default function (io) {
       // and then filter out instead of just setting
       matchingCards.forEach(card => card.known[type + 's'] = [card[type]])
 
-      this.addMessage(`${player.data.name} revealed all the ${card[type]}s in ${infoSocket.data.name}'s hand.`)
+      this.addMessage(`${player.data.name} revealed all the ${wantedCard[type]}s in ${infoSocket.data.name}'s hand.`)
 
       if (!this.checkGameOver()) {
         this.nextPlayer();
@@ -185,8 +215,9 @@ export default function (io) {
 
     // will take out idx from hand and give a new one if possible from deck
     removeCardFromHandAndDraw(player, idx) {
-      const card = player.data.cards.splice(idx, 1)[0];
-      this.dealCardsToPlayer(1, player)
+      const cards = this.hands[player.data.handIdx];
+      const card = cards.splice(idx, 1)[0];
+      cards.push(...this.dealCards(1))
       return card;
     }
     // game over when no fuse left or too many turns when deck is empty
@@ -211,19 +242,20 @@ export default function (io) {
 
     dealHands() {
       const numCards = initialHandCount(this.size);
-      this.playerOrder.forEach(playerId => {
-        const player = this.players[playerId]
-        this.dealCardsToPlayer(numCards, player)
-      });
+      this.hands = Array(this.size).fill(0).map(() => this.dealCards(numCards));
     }
 
-    dealCardsToPlayer(n, player) {
-      if (player.data.cards === undefined) {
-        player.data.cards = [];
-      }
-      if (this.deck.length > 0) {
-        player.data.cards.push(...this.deck.splice(0, n))
-      }
+    dealCards(n) {
+      return this.deck.splice(0, n)
+    }
+
+    // each player will have a hand assigned to them via an index
+    // each turn, we'll check if the hand has a player, if they do, it's a player
+    // if not, we'll know it's an ai and play for them
+    assignIdxs() {
+      Object.values(this.players).forEach((socket, idx) => {
+        socket.data.handIdx = idx;
+      })
     }
 
     sendGameInfo() {
@@ -236,44 +268,50 @@ export default function (io) {
     }
 
     publicGameInfo() {
-      const currentSocketId = this.playerOrder[this.currentPlayerIdx];
       return {
         tokens: this.tokens,
         field: this.field,
         graveyard: this.graveyard,
         deck: this.deck.length,
-        currentPlayer: getUserData(this.players[currentSocketId]),
+        currentPlayer: this.currentPlayerData(),
       }
     }
 
     sendPrivateGameInfo() {
       const privateInfo = this.privateGameInfo();
-      this.playerOrder.forEach(playerId => {
-        const playersInfo = privateInfo[playerId];
-        io.to(playerId).emit('game_private_info', playersInfo);
+      Object.keys(privateInfo).forEach(socketId => {
+        const playersInfo = privateInfo[socketId];
+        io.to(socketId).emit('game_private_info', playersInfo);
       })
     }
 
     // get an object of all playerId -> cards they see
     privateGameInfo() {
-      return this.playerOrder.reduce((acc, playerId) => ({
+      return Object.values(this.players).reduce((acc, socket) => ({
         ...acc,
-        [playerId]: this.privateGameInfoForPlayer(playerId)
+        [socket.id]: this.privateGameInfoForPlayer(socket)
       }), {})
+    }
+    getPlayerDataForHandIdx(idx) {
+      const players = Object.values(this.players)
+      let current = players.find(p => p.data.handIdx === idx)
+      if (current === undefined) {
+        current = this.ai.find(ai => ai.data.handIdx === idx)
+      }
+      return getUserData(current)
     }
 
     // get an array of the cards the player will be able to see
-    privateGameInfoForPlayer(playerHandId) {
-      return this.playerOrder.map(playerId => {
-        let cards = this.players[playerId].data.cards;
-        if (playerHandId === playerId) {
+    privateGameInfoForPlayer(player) {
+      return this.hands.map((cards, idx) => {
+        const current = this.getPlayerDataForHandIdx(idx)
+        if (player.data.id === current.id) {
           // this is done to prevent client from knowing exactly what card it is
           // by looking at socket stuff
           cards = cards.map(card => cardMaker('grey', '?', card.known.values, card.known.colors))
         }
         return {
-          name: this.players[playerId].data.name,
-          id: this.players[playerId].data.id,
+          ...current,
           cards,
         };
       })
