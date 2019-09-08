@@ -197,6 +197,7 @@ export default function (io) {
 
     // remove will swap a player to AI and keep playing
     removePlayer(socket) {
+      this.removeListeners(socket)
       delete this.players[socket.id]
     }
     // swap will change a spectator to a player and remove the original player
