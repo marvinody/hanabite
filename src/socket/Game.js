@@ -103,15 +103,33 @@ export default function (io) {
 
     // advances play to the next player
     // responsible for sending out updates about everything!
+    // also responsible for letting AI play
     nextPlayer() {
       this.currentHandIdx += 1;
       this.currentHandIdx = this.currentHandIdx % this.size;
       this.sendGameInfo();
+      const nextPlayer = this.getPlayerForHandIdx(this.currentHandIdx)
+      console.log(nextPlayer)
+      if (nextPlayer.data.isAI) {
+        this.AIMove()
+      }
     }
 
-    // TODO fix this to work with AI also
+    // TODO make this smarter.
+    // but this works right nows
+    AIMove() {
+      const ai = this.getPlayerForHandIdx(this.currentHandIdx)
+      this.playCard(ai, { idx: 0 })
+    }
+
+    // will search for .data.id within players and ai
     findSocketByPlayerId(playerId) {
-      return Object.values(this.players).find(socket => socket.data.id === playerId)
+      const pred = player => player.data.id === playerId
+      let player = Object.values(this.players).find(pred)
+      if (player === undefined) {
+        player = this.ai.find(pred)
+      }
+      return player
     }
 
     // attach all the needed listeners to one socket
@@ -292,13 +310,19 @@ export default function (io) {
         [socket.id]: this.privateGameInfoForPlayer(socket)
       }), {})
     }
-    getPlayerDataForHandIdx(idx) {
+
+    getPlayerForHandIdx(idx) {
       const players = Object.values(this.players)
-      let current = players.find(p => p.data.handIdx === idx)
-      if (current === undefined) {
-        current = this.ai.find(ai => ai.data.handIdx === idx)
+      let player = players.find(p => p.data.handIdx === idx)
+      if (player === undefined) {
+        player = this.ai.find(ai => ai.data.handIdx === idx)
       }
-      return getUserData(current)
+      return player;
+    }
+
+    getPlayerDataForHandIdx(idx) {
+      const player = this.getPlayerForHandIdx(idx)
+      return getUserData(player)
     }
 
     // get an array of the cards the player will be able to see
