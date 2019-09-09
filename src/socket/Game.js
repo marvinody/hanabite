@@ -47,9 +47,6 @@ export default function (io) {
       }
       this.deck = deckMaker()
       this.graveyard = []
-      // preserve ordering so I can use a simple idx to keep track of person
-      // just need to remember to update it in places needed
-      this.playerOrder = Object.keys(players);
 
       // also need to attach all the event listeners
       Object.values(this.players).forEach(socket => {
@@ -109,7 +106,6 @@ export default function (io) {
       this.currentHandIdx = this.currentHandIdx % this.size;
       this.sendGameInfo();
       const nextPlayer = this.getPlayerForHandIdx(this.currentHandIdx)
-      console.log(nextPlayer)
       if (nextPlayer.data.isAI) {
         this.AIMove()
       }
@@ -140,9 +136,9 @@ export default function (io) {
     }
     // remove yada yada
     removeListeners(player) {
-      player.removeListener('game_give_info')
-      player.removeListener('game_play_card')
-      player.removeListener('game_discard')
+      player.removeAllListeners('game_give_info')
+      player.removeAllListeners('game_play_card')
+      player.removeAllListeners('game_discard')
     }
     // reveal information about another player's cards
     giveInfo(player, data) {
@@ -248,11 +244,36 @@ export default function (io) {
     removePlayer(socket) {
       this.removeListeners(socket)
       delete this.players[socket.id]
-    }
-    // swap will change a spectator to a player and remove the original player
-    swapPlayers(removing, adding) {
 
+      const unusedAI = this.ai.find(ai => ai.data.handIdx === -1)
+
+      const handIdx = socket.data.handIdx
+      delete socket.data.handIdx
+      unusedAI.data.handIdx = handIdx
+
+      this.removeListeners(socket)
+
+      this.addMessage(`${socket.data.name} left and got replaced by a ${unusedAI.data.name}`)
+      // incase the player that left didn't play their turn
+      if (this.isCurrentTurnFor(unusedAI)) {
+        this.AIMove()
+      } else {
+        this.sendGameInfo()
+      }
     }
+    // swap will change a spe ctator to a player and remove the original player
+    swapPlayers(removing, adding) {
+      const handIdx = removing.data.handIdx
+      delete removing.data.handIdx
+      adding.data.handIdx = handIdx
+
+      this.removeListeners(removing)
+      this.addListeners(adding)
+
+      this.addMessage(`${removing.data.name} left and got replaced by ${adding.data.name}`)
+      this.sendGameInfo()
+    }
+
     // add player will swap an AI to a player
     addPlayer(socket) {
 

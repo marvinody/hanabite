@@ -84,21 +84,21 @@ export default function (io) {
       const isHost = this.host.data.id === socket.data.id;
       if (isPlayer) { // we might need to swap people in
         delete this.players[socket.id]
-        this.upgradeSpectator()
-        // if ingame, then let's see how to modify the player idx
+        const newPlayer = this.upgradeSpectator()
+        // if ingame, then let's see how to modify the player
         if (this.state === ROOM_INGAME) {
-          // if the usercount is the same, we don't care
-          // but if we got less AND the count is on the last player
-          // shift it to 0. because that makes sense.
-          const numPlayers = Object.keys(this.players).length
-          if (numPlayers === this.curPlayer) {
-            this.curPlayer = 0
+          // if we have a player, then let's swap them
+          if (newPlayer !== undefined) {
+            this.game.swapPlayers(socket, newPlayer)
+          } else { // else, just remove and let game use AI
+            this.game.removePlayer(socket)
           }
         }
+        // if host is leaving, we need to fix that too
         if (isHost) {
           this.upgradeHost();
         }
-      } else if (isSpectator) {
+      } else if (isSpectator) { // don't care about these guys
         delete this.spectators[socket.id]
       }
       socket.leave(this.uniqueName)
@@ -143,6 +143,7 @@ export default function (io) {
     }
 
     // this should only be called when a player leaves
+    // will return the socket that was upgraded if any
     upgradeSpectator() {
       const spectKeys = Object.keys(this.spectators)
       if (spectKeys.length === 0) {
@@ -155,6 +156,7 @@ export default function (io) {
       delete this.spectators[oldestSpectator.id]
       oldestSpectator.data.ready = false;
       this.players[oldestSpectator.id] = oldestSpectator
+      return oldestSpectator
     }
     upgradeHost() {
       const playerKeys = Object.keys(this.players);
