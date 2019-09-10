@@ -49,7 +49,7 @@ export default function (io) {
       const numPlayers = Object.keys(this.players).length
       const addToHost = numPlayers === 0
       const addToPlayers = numPlayers < this.size
-
+      const addToSpect = !addToPlayers
       if (addToHost) {
         this.host = socket
         this.players[socket.id] = socket
@@ -73,8 +73,16 @@ export default function (io) {
       // and we'll add a message and share that. but socket needs them all
       this.sendAllMessagesTo(socket)
       this.addMessage(`${socket.data.name} has joined!`)
-      if (addToPlayers && this.state === ROOM_INGAME) {
-        this.game.addPlayer(socket);
+      if (this.state === ROOM_INGAME) {
+        if (addToPlayers) {
+          this.game.addPlayer(socket);
+        } else {
+          // if they're a spect, we need to send them only info in the game
+          // TODO this will update everyone and not needed
+          // only new player can be updated
+          this.game.sendGameInfo()
+        }
+
       }
     }
 

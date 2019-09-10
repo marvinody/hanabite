@@ -5,6 +5,8 @@
   import Hands from "./game/Hands.svelte";
 
   $: loaded = $game.loaded && $hands.loaded;
+  $: console.log($game);
+  $: console.log($hands);
 </script>
 
 <style>

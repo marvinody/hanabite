@@ -311,6 +311,7 @@ export default function (io) {
     sendGameInfo() {
       this.sendPublicGameInfo();
       this.sendPrivateGameInfo();
+      this.sendSpectatorGameInfo();
     }
 
     sendPublicGameInfo() {
@@ -371,6 +372,25 @@ export default function (io) {
           cards,
         };
       })
+    }
+    sendSpectatorGameInfo() {
+      // this fn could be done with a spectator-only room
+      // but currently, there is no book-keeping for that currently
+      // so just iterating over peeps should be fine?
+      const data = this.spectatorInfo()
+      Object.keys(this.room.spectators).forEach(socket => {
+        io.to(socket).emit('game_private_info', data)
+      })
+    }
+    spectatorInfo() {
+      const dummyPlayer = {
+        data: { id: -1 }
+      }
+      // this could let us conceal all the hands essentially so if the spectator joins in, no cheating will happen
+      // right now, we are sending the full hands to the player
+      // makes for better viewing?
+      const data = this.privateGameInfoForPlayer(dummyPlayer)
+      return data
     }
   }
 
