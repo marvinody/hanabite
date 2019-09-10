@@ -245,6 +245,12 @@ export default function (io) {
       this.removeListeners(socket)
       delete this.players[socket.id]
 
+      // if no more players, then don't bother with rest
+      // game will close shortly
+      if (Object.keys(this.players) === 0) {
+        return
+      }
+
       const unusedAI = this.ai.find(ai => ai.data.handIdx === -1)
 
       const handIdx = socket.data.handIdx
@@ -276,7 +282,12 @@ export default function (io) {
 
     // add player will swap an AI to a player
     addPlayer(socket) {
-
+      const playingAI = this.ai.find(ai => ai.data.handIdx > -1)
+      const handIdx = playingAI.data.handIdx
+      playingAI.data.handIdx = -1
+      socket.data.handIdx = handIdx
+      this.addListeners(socket)
+      this.sendGameInfo()
     }
 
     dealHands() {

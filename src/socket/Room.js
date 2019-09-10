@@ -45,18 +45,20 @@ export default function (io) {
     }
 
     addPlayer(socket) {
-      // TODO this needs to change if entering a game midway. should be true in that case
       socket.data.ready = false;
       const numPlayers = Object.keys(this.players).length
-      if (numPlayers === 0) {
+      const addToHost = numPlayers === 0
+      const addToPlayers = numPlayers < this.size
+
+      if (addToHost) {
         this.host = socket
         this.players[socket.id] = socket
         // the host will always be ready by default
         socket.data.ready = true;
-      } else if (numPlayers === this.size) {
-        this.spectators[socket.id] = socket
-      } else {
+      } else if (addToPlayers) {
         this.players[socket.id] = socket
+      } else { // otherwise it's a spectator
+        this.spectators[socket.id] = socket
       }
       // some socket stuff for the original person
       socket.leave('lobby')
@@ -71,13 +73,15 @@ export default function (io) {
       // and we'll add a message and share that. but socket needs them all
       this.sendAllMessagesTo(socket)
       this.addMessage(`${socket.data.name} has joined!`)
+      if (addToPlayers && this.state === ROOM_INGAME) {
+        this.game.addPlayer(socket);
+      }
     }
 
     // returns true if no more players in room
     // false otherwise
     // if empty, need to be deleted manually and everyone informed
     // this only informs if >0 players in room
-    // TODO choose new host also
     removePlayer(socket) {
       const isPlayer = this.players[socket.id] !== undefined
       const isSpectator = this.spectators[socket.id] !== undefined

@@ -1,10 +1,10 @@
 <script>
-  import { room, self, game, hands } from "../stores/";
+  import { game, hands } from "../stores/";
   import Chat from "./Chat";
   import Field from "./game/Board.svelte";
   import Hands from "./game/Hands.svelte";
 
-  $: ({ field, tokens } = $game);
+  $: loaded = $game.loaded && $hands.loaded;
 </script>
 
 <style>
@@ -14,13 +14,13 @@
 <div class="columns">
   <div class="column">
     <div class="game">
-      {#if !$game.loaded}
+      {#if !loaded}
         <div>Loading...</div>
       {:else}
         <Field />
       {/if}
 
-      {#if !$hands.loaded}
+      {#if !loaded}
         <div>Loading Hands...</div>
       {:else}
         <Hands />
