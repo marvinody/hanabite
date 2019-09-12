@@ -29,7 +29,6 @@ export default function (io) {
     })
 
     socket.on('req_room_join', id => {
-      console.log(`${socket.data.name} joining ${id}`)
       const room = rooms.findById(id)
       if (!room) {
         // just send empty obj if 404
