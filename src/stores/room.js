@@ -1,6 +1,6 @@
-import { loadingWritable } from './utils'
-import socket from './socket'
 import { goto } from '@sapper/app';
+import socket from './socket';
+import { loadingWritable } from './utils';
 
 
 export const room = loadingWritable({})
@@ -37,11 +37,6 @@ socket.on('res_room_join', newRoom => {
 export const leaveRoom = () => {
   socket.emit('req_room_leave')
 }
-
-socket.on('res_room_leave', () => {
-  goto('/rooms/')
-})
-
 
 socket.on('room_player_join', newRoom => {
   room.set(newRoom)

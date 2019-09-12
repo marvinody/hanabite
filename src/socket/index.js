@@ -65,6 +65,14 @@ export default function (io) {
       socket.data.room.attemptToStart(socket);
     })
 
+    socket.on('req_room_leave', () => {
+      // if user not part of room, don't bother doing anything
+      if (!socket.data.room) {
+        return
+      }
+      rooms.removePlayer(socket, socket.data.room.id)
+    })
+
     socket.on('disconnect', () => {
       if (socket.data.room) {
         rooms.removePlayer(socket, socket.data.room.id)
