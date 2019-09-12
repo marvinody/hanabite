@@ -25,6 +25,42 @@ export default function (io) {
       this.curPlayer = 0 // idx for who's turn it is
     }
 
+    // imagine game over, everyone back to lobby and reset
+    setToPregameState() {
+      this.state = ROOM_PREGAME;
+      this.unreadyPlayers();
+      // maybe not the best but hopefully game will be garbage collected?
+      delete this.game;
+
+      // let players see pregame lobby again
+      io.to(this.uniqueName).emit('room_state_update', {
+        state: this.state,
+      })
+
+      // let player see other player's status
+      io.to(this.uniqueName).emit('room_player_update', this.playerInfo())
+
+      // let player see self is unready again
+      Object.values(this.players).forEach(socket => {
+        const userData = getUserData(socket)
+        socket.emit('self_info', userData)
+      })
+
+      // let lobby know what's going on
+      io.to('lobby').emit('lobby_room_update', this.basicInfo())
+
+
+    }
+
+    unreadyPlayers() {
+      Object.values(this.players).forEach(socket => {
+        if (socket.id === this.host.id) {
+          return // don't need to adjust host's ready
+        }
+        socket.data.ready = false
+      })
+    }
+
     addMessage(message, from = null) {
       if (message.length === 0 || message.length > MAX_CHARS_FOR_MSG) {
         return

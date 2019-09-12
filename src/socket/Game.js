@@ -32,6 +32,8 @@ export default function (io) {
       this.size = maxSize;
       this.roomCode = roomCode
 
+      this.turnsSinceEmptyDeck = 0;
+
       this.field = allColors.reduce((acc, color) => ({
         ...acc, [color]: 0
       }), {}) // all colors start at 0 card
@@ -234,10 +236,38 @@ export default function (io) {
       cards.push(...this.dealCards(1))
       return card;
     }
+
     // game over when no fuse left or too many turns when deck is empty
     // changes state where needed and sends out events
+    // this also assumes it's only called once per turn
     checkGameOver() {
-      return false;
+      if (this.tokens.fuse.current === 0) {
+        this.issueGameOver()
+        return true;
+      }
+      if (this.deck.length === 0) {
+        this.turnsSinceEmptyDeck += 1
+      }
+      if (this.turnsSinceEmptyDeck === this.size + 1) {
+        this.issueGameOver()
+        return true
+      }
+
+      return false
+    }
+
+    issueGameOver() {
+      // remove listeners so game doesn't get confused later
+      Object.values(this.players).forEach(socket => {
+        this.removeListeners(socket)
+        delete socket.data.handIdx
+      })
+      const score = Object.values(this.field).reduce((acc, cur) => acc + cur, 0)
+
+      this.addMessage(`Game over! Score: ${score}/25`)
+
+      // and let's let the room handle everything
+      this.room.setToPregameState()
     }
 
     // remove will swap a player to AI and keep playing
@@ -256,8 +286,6 @@ export default function (io) {
       const handIdx = socket.data.handIdx
       delete socket.data.handIdx
       unusedAI.data.handIdx = handIdx
-
-      this.removeListeners(socket)
 
       this.addMessage(`${socket.data.name} left and got replaced by a ${unusedAI.data.name}`)
       // incase the player that left didn't play their turn
@@ -295,6 +323,7 @@ export default function (io) {
       this.hands = Array(this.size).fill(0).map(() => this.dealCards(numCards));
     }
 
+    // this will deal an empty set if no more cards which is ok!
     dealCards(n) {
       return this.deck.splice(0, n)
     }
