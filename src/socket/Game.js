@@ -277,7 +277,7 @@ export default function (io) {
 
       // if no more players, then don't bother with rest
       // game will close shortly
-      if (Object.keys(this.players) === 0) {
+      if (Object.keys(this.players).length === 0) {
         return
       }
 
