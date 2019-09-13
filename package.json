@@ -2,6 +2,9 @@
   "name": "TODO",
   "description": "TODO",
   "version": "0.0.1",
+  "engines": {
+    "node": ">= 11.14.0"
+  },
   "scripts": {
     "dev": "sapper dev --no-hot",
     "build": "sapper build",
