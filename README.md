@@ -1,88 +1,27 @@
-# sapper-template
+# [Hanabite](https://hanabite.deploy.sadpanda.moe/)
+Hanabi in Svelte
 
-The default [Sapper](https://github.com/sveltejs/sapper) template, with branches for Rollup and webpack. To clone it and get started:
+## Dev
+- fork and clone
+- `npm install`
+- `npm run dev`
+- work away
 
-```bash
-# for Rollup
-npx degit "sveltejs/sapper-template#rollup" my-app
-# for webpack
-npx degit "sveltejs/sapper-template#webpack" my-app
-cd my-app
-npm install # or yarn!
-npm run dev
-```
+Directory of importance: `src/`
 
-Open up [localhost:3000](http://localhost:3000) and start clicking around.
+## Why?
+A project undertaken to learn Svelte and get more comfortable with sockets. Main technologies in use are Svelte & Sapper, polka, and SocketIO. When learning new tech, I try to limit my use of external libraries so I'm forced to use whatever is given.
 
-Consult [sapper.svelte.dev](https://sapper.svelte.dev) for help getting started.
+## What I wanted?
+My goal going into this was to have a playable version of Hanabi with online multiplayer, realtime updates, spectator viewing, a lobby system to handle multiple rooms, and AI players.
 
+## What I got?
+AI turned out to be way too much work for the span I wanted to complete this in so I ended up tossing it to the side. I was able to reuse some logic from a previous project (cubestory) and massage it a bit to make it more generic.
 
-## Structure
+## What I learned?
+While working on this, I had some...interesting...interactions with font awesome because the \<i> tags get changed to svg or something else which then svelte doesn't keep track of. So I initally assigned classes to icons and my code was throwing errors anytime it tried to change them. Let me tell you the error code was not helpful at all though. Browser debugger let me pause on exceptions and find out which component was throwing errors and I was able to go from there, but man, not nice.
 
-Sapper expects to find two directories in the root of your project —  `src` and `static`.
+Having the power to have some redux-like single source of truth natively through Svelte's store is something I will miss if I go back to plain React. The ability to create your own store is something I took advantages of to distinguish between empty and unloaded everywhere in the application. Had I the chance to go back in time and tell myself something before starting, it would be to make sure I was abusing the store instead of using props passed down. It might be less efficient, but it's definitely simpler to know where data is and if you have it. I would also probably look for some redux-like library to have a pure functional reducer for updating state (or make my own).
 
-
-### src
-
-The [src](src) directory contains the entry points for your app — `client.js`, `server.js` and (optionally) a `service-worker.js` — along with a `template.html` file and a `routes` directory.
-
-
-#### src/routes
-
-This is the heart of your Sapper app. There are two kinds of routes — *pages*, and *server routes*.
-
-**Pages** are Svelte components written in `.svelte` files. When a user first visits the application, they will be served a server-rendered version of the route in question, plus some JavaScript that 'hydrates' the page and initialises a client-side router. From that point forward, navigating to other pages is handled entirely on the client for a fast, app-like feel. (Sapper will preload and cache the code for these subsequent pages, so that navigation is instantaneous.)
-
-**Server routes** are modules written in `.js` files, that export functions corresponding to HTTP methods. Each function receives Express `request` and `response` objects as arguments, plus a `next` function. This is useful for creating a JSON API, for example.
-
-There are three simple rules for naming the files that define your routes:
-
-* A file called `src/routes/about.svelte` corresponds to the `/about` route. A file called `src/routes/blog/[slug].svelte` corresponds to the `/blog/:slug` route, in which case `params.slug` is available to the route
-* The file `src/routes/index.svelte` (or `src/routes/index.js`) corresponds to the root of your app. `src/routes/about/index.svelte` is treated the same as `src/routes/about.svelte`.
-* Files and directories with a leading underscore do *not* create routes. This allows you to colocate helper modules and components with the routes that depend on them — for example you could have a file called `src/routes/_helpers/datetime.js` and it would *not* create a `/_helpers/datetime` route
-
-
-### static
-
-The [static](static) directory contains any static assets that should be available. These are served using [sirv](https://github.com/lukeed/sirv).
-
-In your [service-worker.js](app/service-worker.js) file, you can import these as `files` from the generated manifest...
-
-```js
-import { files } from '@sapper/service-worker';
-```
-
-...so that you can cache them (though you can choose not to, for example if you don't want to cache very large files).
-
-
-## Bundler config
-
-Sapper uses Rollup or webpack to provide code-splitting and dynamic imports, as well as compiling your Svelte components. With webpack, it also provides hot module reloading. As long as you don't do anything daft, you can edit the configuration files to add whatever plugins you'd like.
-
-
-## Production mode and deployment
-
-To start a production version of your app, run `npm run build && npm start`. This will disable live reloading, and activate the appropriate bundler plugins.
-
-You can deploy your application to any environment that supports Node 8 or above. As an example, to deploy to [Now](https://zeit.co/now), run these commands:
-
-```bash
-npm install -g now
-now
-```
-
-
-## Using external components
-
-When using Svelte components installed from npm, such as [@sveltejs/svelte-virtual-list](https://github.com/sveltejs/svelte-virtual-list), Svelte needs the original component source (rather than any precompiled JavaScript that ships with the component). This allows the component to be rendered server-side, and also keeps your client-side app smaller.
-
-Because of that, it's essential that the bundler doesn't treat the package as an *external dependency*. You can either modify the `external` option under `server` in [rollup.config.js](rollup.config.js) or the `externals` option in [webpack.config.js](webpack.config.js), or simply install the package to `devDependencies` rather than `dependencies`, which will cause it to get bundled (and therefore compiled) with your app:
-
-```bash
-npm install -D @sveltejs/svelte-virtual-list
-```
-
-
-## Bugs and feedback
-
-Sapper is in early development, and may have the odd rough edge here and there. Please be vocal over on the [Sapper issue tracker](https://github.com/sveltejs/sapper/issues).
+## What's next?
+If I were to continue working on this project, the next steps (in no particular order) would be to work on getting AI to not be dumb, allowing people to tell other players stuff like "these 3 cards are NOT yellow." The code can support negations but I was unsure of how to display it in a visually pleasing way so I dropped it (how do you show a card can be 1,2,5 but not 3,4?). Also, making it mobile-ok and having responsive cards would be a good starting point. I spent a significant amount of time researching responsive aspect ratio things but none could satisfy my requirements in a simple way. If I go back, I may use JavaScript to dynamically change the height that way instead of relying on CSS.
