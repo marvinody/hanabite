@@ -42,7 +42,9 @@
   <title>Home</title>
 </svelte:head>
 
-<h1>Hanabite</h1>
+<h1>
+  <a href="https://github.com/marvinody/hanabite">Hanabite</a>
+</h1>
 <h2>Hanabi in Svelte</h2>
 
 <div>
